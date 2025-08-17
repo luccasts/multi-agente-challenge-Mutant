@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Multi-Agent Chat (Gemini)</title>
+    <style>
+      body {
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+        background: #0f172a;
+        color: #e2e8f0;
+        margin: 0;
+      }
+      .wrap {
+        max-width: 860px;
+        margin: 0 auto;
+        padding: 24px;
+      }
+      header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+      header h1 {
+        font-size: 20px;
+        margin: 0;
+      }
+      .chat {
+        background: #0b1220;
+        border: 1px solid #1e293b;
+        border-radius: 16px;
+        padding: 16px;
+        min-height: 420px;
+      }
+      .msg {
+        padding: 10px 12px;
+        border-radius: 12px;
+        margin: 10px 0;
+        width: fit-content;
+        max-width: 80%;
+        line-height: 1.35;
+      }
+      .user {
+        background: #1d4ed8;
+        margin-left: auto;
+      }
+      .agent {
+        background: #334155;
+      }
+      .meta {
+        font-size: 12px;
+        opacity: 0.8;
+        margin-top: 4px;
+      }
+      form {
+        display: flex;
+        gap: 8px;
+        margin-top: 12px;
+      }
+      input,
+      button {
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1px solid #1e293b;
+        background: #0b1220;
+        color: #e2e8f0;
+      }
+      button {
+        background: #22c55e;
+        color: #0b1220;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+      }
+      button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+      .small {
+        font-size: 12px;
+        opacity: 0.8;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <img src="/public/assets/mutant.png" alt="Logo da Mutant" height="32" />
+        <img
+          src="/public/assets/unirios.png"
+          alt="Logo da UniRios"
+          height="32"
+        />
+        <h1>Atendimento • Multi-Agente + Gemini</h1>
+        <div class="small">Router → Billing/Support • MCP • Métricas</div>
+      </header>
+
+      <div id="chat" class="chat"></div>
+
+      <form id="f">
+        <input
+          id="t"
+          required
+          placeholder="Digite sua mensagem..."
+          autocomplete="off"
+          style="flex: 1"
+        />
+        <button id="b">Enviar</button>
+      </form>
+      <div class="small">
+        Dica: fale de <b>fatura/parcelamento</b> ou peça <b>segunda via</b>.
+      </div>
+      <div class="small">
+        Métricas:
+        <a href="/metrics" target="_blank" style="color: #93c5fd">/metrics</a>
+      </div>
+    </div>
+
+    <script>
+      const chat = document.getElementById("chat");
+      const form = document.getElementById("f");
+      const input = document.getElementById("t");
+      const btn = document.getElementById("b");
+
+      function addMsg(text, who = "agent", meta = "") {
+        const div = document.createElement("div");
+        div.className = "msg " + (who === "user" ? "user" : "agent");
+        div.innerHTML = text.replace(/\n/g, "<br>");
+        chat.appendChild(div);
+        if (meta) {
+          const m = document.createElement("div");
+          m.className = "meta";
+          m.textContent = meta;
+          chat.appendChild(m);
+        }
+        chat.scrollTop = chat.scrollHeight;
+      }
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const text = input.value.trim();
+        if (!text) return;
+        addMsg(text, "user");
+        input.value = "";
+        btn.disabled = true;
+
+        try {
+          const res = await fetch("/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text, meta: { customer: "alice" } }),
+          });
+          const out = await res.json();
+          addMsg(out.reply, "agent", `[agente: ${out.agent}]`);
+        } catch (err) {
+          addMsg("Erro ao enviar mensagem. Veja console.", "agent");
+          console.error(err);
+        } finally {
+          btn.disabled = false;
+        }
+      });
+
+      addMsg("Olá! Posso ajudar com sua fatura ou enviar a 2ª via do boleto.");
+    </script>
+  </body>
+</html>
