@@ -110,4 +110,5 @@ streamlit run streamlit_app.py
 
 Assista a um tour completo pelo projeto e veja as métricas em ação.
 
-- **Link do Vídeo:** <LINK_DO_SEU_VÍDEO_NO_YOUTUBE>
+- **Link do Vídeo:** AINDA EM PROCESSO
+  \_
