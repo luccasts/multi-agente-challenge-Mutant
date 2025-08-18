@@ -58,12 +58,10 @@ class SupportAgent(BaseAgent):
 
 class RouterAgent(BaseAgent):
     name = "router"
-   
-    
     def handle(self, msg: Message) -> Tuple[str, Dict]:
         t = msg.text.lower()
         billing_keywords = [
-        "boleto", "cobran", "fatura", "parcel", "saldo", "conta", "pagar"
+        "boleto", "cobran", "fatura", "parcel", "saldo", "conta", "pagar", "pagamento","pix"
         ]  
         suport_keywords = [
             "suporte", "problem", "erro", "segunda via", "atendimento", "problem 2 via", "ajuda", "não funciona", "nao funciona"
